@@ -1,5 +1,40 @@
-version: '3.8'
+version: '3.9'
+
+# Define the services/containers to be run
 services:
+  frontend: #name of the first service
+    build: '../client' # specify the directory of the Dockerfile
+    image: frontend:latest
+    environment:
+      - PORT=9000
+    ports:
+      - '8080:9000' # specify port forewarding
+    container_name: web-app
+    restart: unless-stopped
+    networks:
+      - frontend # link this service to the backend service
+    depends_on:
+      - backend
+
+  backend: #name of the second service
+    build: '../server' # specify the directory of the Dockerfile
+    image: backend:latest
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/expensetracker
+    volumes:
+      - /app/node_modules
+    ports:
+      - 25000:5000 #specify ports forewarding
+    container_name: web-server
+    restart: unless-stopped
+    networks:
+      - frontend # link this service to the frontend service
+      - backend # link this service to the database service
+    depends_on:
+      - mongodb
+
   mongodb:
     image: mongo
     container_name: mongodb
@@ -11,3 +46,9 @@ services:
     ports:
       - 27017:27017
     restart: unless-stopped
+    networks:
+      - backend # link this service to the database service
+
+networks:
+  frontend:
+  backend:

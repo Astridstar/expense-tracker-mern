@@ -1,24 +1,26 @@
+# Create image based on the official Node image from dockerhub
 FROM node:14.17.1-alpine3.13
 
 # Create app directory
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
-
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
-COPY package*.json ./
+COPY package*.json /app/
 
-RUN npm install --silent
+# Install dependecies
+RUN npm install 
 
 # If you are building your code for production
 #RUN npm ci --only=production
 
 # Bundle app source
 # COPY ./client/build ./client/build
-COPY . .
+COPY . /app/
 
-#EXPOSE 8080
-CMD [ "node", "server.js" ]
+# Expose the port the app runs in
+#EXPOSE 3000
+
+# Serve the app
+CMD [ "npm", "start" ]
