@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+  labels:
+    name: webappservice
+    component: frontend
+  namespace: development
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: http-port
+      protocol: TCP
+  #   nodePort: 31000
+  selector:
+    name: webappservice
+    component: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+  namespace: development
+  labels:
+    name: webapp
+    component: frontend
+spec:
+  selector:
+    matchLabels:
+      name: webapp
+      component: frontend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: webapp
+        component: frontend
+    spec:
+      containers:
+        - name: webapp
+          image: ghcr.io/astridstar/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: http-port
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+      imagePullSecrets:
+        - name: dockerconfigjson-github-com

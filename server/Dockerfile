@@ -2,7 +2,7 @@
 FROM node:14.17.1-alpine3.13
 
 # Create a directory where our app will be placed
-RUN mkdir -p /app
+#RUN mkdir -p /app
 
 # Create app directory
 WORKDIR /app
@@ -12,14 +12,13 @@ WORKDIR /app
 # where available (npm@5+)
 COPY package*.json /app/
 
-RUN npm install --silent
-
-# If you are building your code for production
+#RUN npm install
 #RUN npm ci --only=production
+RUN npm install debug
 
 # Bundle app source
 COPY . /app/
+#COPY . . 
 
-#EXPOSE 8080
-#CMD [ "node", "server.js" ]
+#EXPOSE 5000
 CMD [ "npm", "start" ]

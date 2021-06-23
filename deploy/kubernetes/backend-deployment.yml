@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: webservice
+  labels:
+    name: webservice
+    component: backend
+  namespace: development
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+  selector:
+    name: webservice
+    component: backend
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webserver
+  namespace: development
+  labels:
+    name: webserver
+    component: backend
+spec:
+  selector:
+    matchLabels:
+      name: webserver
+      component: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: webserver
+        component: backend
+    spec:
+      containers:
+        - name: webserver
+          image: ghcr.io/astridstar/backend:latest
+          imagePullPolicy: Always
+          workingDir: /app
+          ports:
+            - containerPort: 5000
+              name: nodejs-port
+          env:
+            - name: NODE_ENV
+              value: 'development'
+            - name: PORT
+              value: '5000'
+            - name: MONGO_URI
+              value: 'mongodb://mongodb-svc:27017/expensetracker'
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+      imagePullSecrets:
+        - name: dockerconfigjson-github-com

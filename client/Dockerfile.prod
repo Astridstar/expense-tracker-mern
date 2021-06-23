@@ -1,27 +1,33 @@
+# Create image based on the official Node image from dockerhub
 FROM node:14.17.1-alpine3.13
 
 # Create app directory
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
-
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
-COPY package*.json ./
+COPY package*.json /app/
+
+# Install 
+RUN npm ci --silent
+RUN npm install 
 
 # If you are building your code for production
-RUN npm ci --only=production
-RUN npm install react-scripts@3.4.0 -g --silent
+#RUN npm ci --only=production
 
 # Bundle app source
-COPY . ./
+# COPY ./client/build ./client/build
+COPY . /app/
 
 RUN npm run build
 
 # Production environment
 FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
+
+# new
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-CMD [ "nginx", "g", "daemon off;" ]
+CMD ["nginx", "-g", "daemon off;"]
+
